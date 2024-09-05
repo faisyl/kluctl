@@ -305,7 +305,22 @@ func (g *MirroredGitRepo) update(repoDir string) error {
 			break
 		}
 	}
+	w, err := r.Worktree()
+	if err != nil {
+		return err
+	}
+	s, err := w.Submodules()
+	if err != nil {
+		return err
+	}
 
+	err = s.Update(&git.SubmoduleUpdateOptions{
+		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
+		Auth:              auth.AuthMethod,
+	})
+	if err != nil {
+		return err
+	}
 	_ = os.WriteFile(filepath.Join(g.mirrorDir, ".update-time"), []byte(time.Now().Format(time.RFC3339Nano)), 0644)
 
 	return nil
